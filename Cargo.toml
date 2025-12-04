@@ -1,6 +1,6 @@
 [package]
 name = "secret-populator"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 license = "MIT"
 description = "CLI tool to create/delete large amounts of secrets in AWS Secrets Manager"
