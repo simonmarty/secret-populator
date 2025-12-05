@@ -2,7 +2,6 @@ use std::num::NonZeroU64;
 
 use aws_config::BehaviorVersion;
 use aws_sdk_secretsmanager::{
-    Client,
     operation::{create_secret::CreateSecretError, delete_secret::DeleteSecretError},
 };
 use clap::{Parser, Subcommand};
@@ -12,6 +11,8 @@ use indicatif::{MultiProgress, ProgressBar, ProgressDrawTarget, ProgressStyle};
 #[command(name = "secret-populator")]
 #[command(about = "Manage secrets in AWS Secrets Manager")]
 struct Args {
+    #[arg(long)]
+    endpoint_url: Option<String>,
     #[command(subcommand)]
     command: Command,
 }
@@ -36,7 +37,9 @@ enum Command {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
     let config = aws_config::load_defaults(BehaviorVersion::latest()).await;
-    let client = Client::new(&config);
+    let mut client_config = aws_sdk_secretsmanager::config::Builder::from(&config);
+    client_config.set_endpoint_url(args.endpoint_url);
+    let client = aws_sdk_secretsmanager::Client::from_conf(client_config.build());
 
     match args.command {
         Command::Create { count, prefix } => {
